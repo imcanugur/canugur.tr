@@ -19,9 +19,9 @@ else
 fi
 
 # Configuration
-PROJECT_DIR="/var/www/canugur-tr"
-LOG_FILE="/var/www/log/canugur-tr.log"
-APP_NAME="canugur-tr"
+PROJECT_DIR="/var/www/canugur.tr"
+LOG_FILE="/var/www/log/canugur.tr.log"
+APP_NAME="canugur.tr"
 MAX_RETRIES=5
 RETRY_DELAY=5
 
