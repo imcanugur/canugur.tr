@@ -119,22 +119,23 @@ function ContactForm() {
               value={userInput.message}
             />
           </div>
-          <Turnstile
-            sitekey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY}
-            onVerify={(token) => setCaptchaToken(token)}
-            theme="dark"
-            className="mt-4"
-          />
+          <div className="flex justify-center mt-4">
+            <Turnstile
+              sitekey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY}
+              onVerify={(token) => setCaptchaToken(token)}
+              theme="dark"
+            />
+          </div>
           <div className="flex flex-col items-center gap-3">
             {error.required && (
               <p className="text-sm text-red-400">All fiels are required!</p>
             )}
             <button
               className={`flex items-center gap-1 hover:gap-3 rounded-full 
-    bg-gradient-to-r from-pink-500 to-violet-600 px-5 md:px-12 py-2.5 md:py-3 
-    text-center text-xs md:text-sm font-medium uppercase tracking-wider text-white 
-    no-underline transition-all duration-200 ease-out hover:text-white hover:no-underline md:font-semibold
-    ${!captchaToken || isLoading ? "opacity-50 cursor-not-allowed" : ""}`}
+                bg-gradient-to-r from-pink-500 to-violet-600 px-5 md:px-12 py-2.5 md:py-3 
+                text-center text-xs md:text-sm font-medium uppercase tracking-wider text-white 
+                no-underline transition-all duration-200 ease-out hover:text-white hover:no-underline md:font-semibold
+                ${!captchaToken || isLoading ? "opacity-50 cursor-not-allowed" : ""}`}
               role="button"
               onClick={handleSendMail}
               disabled={!captchaToken || isLoading}
