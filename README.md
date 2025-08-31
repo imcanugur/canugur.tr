@@ -1,5 +1,3 @@
-
-
 # Developer Portfolio
 
 #### Are you struggling to create a professional portfolio website? Look no further! You can use the Developer Portfolio template and create your very own personalized portfolio today! My website is designed to be user-friendly and easily customizable, making it perfect for both developers and freelancers.
@@ -127,6 +125,7 @@ Open [http://localhost:3000](http://localhost:3000) with your browser to see the
 Please create a new `.env` file from `.env.example` file.
 
 ### Then, Customize data in the `utils/data` [folder](https://github.com/imcanugur/canugur-tr/tree/master/utils/data).
+
 ---
 
 # Deployment :rocket:

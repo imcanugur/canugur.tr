@@ -12,7 +12,7 @@ async function sendTelegramMessage(token, chat_id, message) {
   } catch (error) {
     console.error(
       "Error sending Telegram message:",
-      error.response?.data || error.message
+      error.response?.data || error.message,
     );
     return false;
   }
@@ -28,13 +28,13 @@ export async function POST(request) {
       new URLSearchParams({
         secret: process.env.TURNSTILE_SECRET_KEY,
         response: captchaToken,
-      })
+      }),
     );
 
     if (!verifyRes.data.success) {
       return NextResponse.json(
         { success: false, message: "Captcha verification failed!" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -47,13 +47,17 @@ export async function POST(request) {
           success: false,
           message: "Telegram token or chat ID is missing.",
         },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
     const message = `📩 New message\n\n👤 Name: ${name}\n📧 Email: ${email}\n💬 Message: ${userMessage}`;
 
-    const telegramSuccess = await sendTelegramMessage(botToken, chatId, message);
+    const telegramSuccess = await sendTelegramMessage(
+      botToken,
+      chatId,
+      message,
+    );
 
     if (telegramSuccess) {
       return NextResponse.json(
@@ -61,7 +65,7 @@ export async function POST(request) {
           success: true,
           message: "Message sent successfully!",
         },
-        { status: 200 }
+        { status: 200 },
       );
     }
 
@@ -70,7 +74,7 @@ export async function POST(request) {
         success: false,
         message: "Failed to send message.",
       },
-      { status: 500 }
+      { status: 500 },
     );
   } catch (error) {
     console.error("API Error:", error.message);
@@ -79,7 +83,7 @@ export async function POST(request) {
         success: false,
         message: "Server error occurred.",
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
