@@ -1,8 +1,5 @@
 services:
   canugur-tr:
-    build:
-      context: .
-      dockerfile: Dockerfile
     container_name: canugur-tr
     restart: unless-stopped
     networks:
