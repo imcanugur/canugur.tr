@@ -1,4 +1,4 @@
 module.exports = {
-  siteUrl: 'https://canugur.tr',
+  siteUrl: "https://canugur.tr",
   generateRobotsTxt: true,
-}
+};
