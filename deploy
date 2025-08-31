@@ -1,0 +1,124 @@
+#!/bin/bash
+
+if [ -z "$BASH_VERSION" ]; then
+    echo "This script must be run with bash, not sh."
+    exit 1
+fi
+
+if [[ "$1" != "test" && "$1" != "production" ]]; then
+    echo "Usage: $0 [test|production]"
+    exit 1
+fi
+
+if [ "$1" == "test" ]; then
+    BRANCH="test"
+    HEALTH_CHECK_URL="https://canugur.tr/"
+else
+    BRANCH="master"
+    HEALTH_CHECK_URL="https://canugur.tr/"
+fi
+
+# Configuration
+PROJECT_DIR="/var/www/canugur-tr"
+LOG_FILE="/var/www/log/canugur-tr.log"
+APP_NAME="canugur-tr"
+MAX_RETRIES=5
+RETRY_DELAY=5
+
+log_message() {
+    echo "$(date +'%Y-%m-%d %H:%M:%S') - $1" | tee -a "$LOG_FILE"
+}
+
+exit_on_error() {
+    log_message "ERROR: $1"
+    exit 1
+}
+
+health_check() {
+    log_message "Performing health check..."
+    for ((i=1; i<=MAX_RETRIES; i++)); do
+        HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" "$HEALTH_CHECK_URL")
+        if [ "$HTTP_STATUS" -eq 200 ]; then
+            log_message "Health check passed."
+            return 0
+        else
+            log_message "Health check failed (Status: $HTTP_STATUS). Retrying in $RETRY_DELAY seconds..."
+            sleep "$RETRY_DELAY"
+        fi
+    done
+    exit_on_error "Health check failed after $MAX_RETRIES attempts."
+}
+
+reload_pm2() {
+    log_message "Reloading PM2 application..."
+    if pm2 describe "$APP_NAME" &> /dev/null; then
+        pm2 reload "$APP_NAME" --update-env || log_message "Warning: Failed to reload PM2 application."
+    else
+        log_message "PM2 application '$APP_NAME' not found. Starting a new process..."
+        cd "$PROJECT_DIR" || exit_on_error "Failed to navigate to project directory."
+        pm2 start "npm run start" --name "$APP_NAME" || log_message "Warning: Failed to start PM2 application."
+    fi
+}
+
+reload_nginx() {
+    log_message "Reloading Nginx..."
+    sudo nginx -t || exit_on_error "Nginx configuration test failed"
+    sudo systemctl reload nginx || exit_on_error "Failed to reload Nginx"
+}
+
+
+
+# Start
+log_message "Starting deployment for $APP_NAME..."
+
+# Navigate to project directory
+cd "$PROJECT_DIR" || exit_on_error "Failed to navigate to project directory."
+
+
+# Switch to the correct branch
+log_message "Checking out branch: $BRANCH..."
+git checkout "$BRANCH" || exit_on_error "Failed to checkout branch $BRANCH."
+
+# Fetch the latest changes and reset the working directory
+log_message "Fetching latest changes and resetting to origin/$BRANCH..."
+git fetch origin || exit_on_error "Failed to fetch changes from repository."
+git reset --hard "origin/$BRANCH" || exit_on_error "Failed to reset to the latest commit."
+
+# Set executable permissions for the deploy script
+log_message "Setting executable permissions for deploy..."
+chmod +x deploy || exit_on_error "Failed to set permissions for deploy."
+
+# Install dependencies
+log_message "Installing dependencies..."
+if command -v yarn &> /dev/null; then
+    yarn install --frozen-lockfile || exit_on_error "Failed to install dependencies with Yarn."
+else
+    npm ci || exit_on_error "Failed to install dependencies with npm."
+fi
+
+# Run static code analysis
+log_message "Running static code analysis..."
+npm run lint || log_message "Linting issues found, proceeding..."
+
+# Run tests
+# log_message "Running tests..."
+# npm run test || log_message "Tests failed, proceeding..."
+
+# Build the Next.js project
+log_message "Building the Next.js project..."
+npm run build || exit_on_error "Build process failed."
+
+# Reload or start the application using PM2
+reload_pm2
+
+# Reload Nginx to apply any new configurations
+log_message "Reloading Nginx..."
+reload_nginx || exit_on_error "Failed to reload Nginx."
+
+# Perform health check (if enabled)
+# Uncomment if a health check is needed
+log_message "Performing health check..."
+health_check || exit_on_error "Health check failed."
+
+# Deployment completed
+log_message "Deployment completed successfully!"
