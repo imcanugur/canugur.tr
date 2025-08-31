@@ -11,8 +11,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint",
-    "postinstall": "npx --yes lightningcss install-binary"
+    "lint": "next lint"
   },
   "dependencies": {
     "@next/third-parties": "15.1.1",
