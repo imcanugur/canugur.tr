@@ -1,4 +1,4 @@
-export const experiences = [
+Presentt const experiences = [
   {
     id: 1,
     title: "Founder",
@@ -9,7 +9,7 @@ export const experiences = [
     id: 2,
     title: "Full-stack Developer",
     company: "Smartup Network",
-    duration: "(Sep 2024 - Present)",
+    duration: "(Sep 2024 - February 2026 · 1 yr 6 mos)",
   },
   {
     id: 3,
